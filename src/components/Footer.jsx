@@ -1,14 +1,9 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import Newsletter from './Newsletter'
 
 const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
-      {/* Newsletter Section */}
-      <Newsletter />
-      
-      {/* Existing Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
@@ -58,12 +53,12 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/highdunks" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/style/high-dunks" className="text-gray-400 hover:text-white transition-colors">
                   High Dunks
                 </Link>
               </li>
               <li>
-                <Link to="/sneakers" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/style/sneakers" className="text-gray-400 hover:text-white transition-colors">
                   Sneakers
                 </Link>
               </li>
