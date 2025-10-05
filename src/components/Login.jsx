@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import { auth, googleProvider } from '../firebase/config'
 
@@ -15,6 +15,8 @@ const Login = () => {
   })
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirect = searchParams.get('redirect') || ''
 
   const handleChange = (e) => {
     setFormData({
@@ -23,7 +25,6 @@ const Login = () => {
     })
   }
 
-  // Email/Password Authentication
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -43,36 +44,37 @@ const Login = () => {
           return
         }
 
-        // Create user with Firebase
         const userCredential = await createUserWithEmailAndPassword(
           auth, 
           formData.email, 
           formData.password
         )
         
-        // Save additional user data to localStorage
+        // Simple user data for email registration
         const userData = {
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
           address: formData.address,
           uid: userCredential.user.uid,
-          createdAt: new Date().toISOString()
+          photoURL: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'
         }
         
         localStorage.setItem('kicksUser', JSON.stringify(userData))
         alert('Registration successful!')
       } else {
-        // Login with Firebase
-        await signInWithEmailAndPassword(auth, formData.email, formData.password)
+        // Simple email login
+        const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password)
+        const user = userCredential.user
         
-        // Get existing user data or create basic one
+        // Check if we have existing user data
         const existingUser = JSON.parse(localStorage.getItem('kicksUser') || '{}')
         if (!existingUser.uid) {
           const userData = {
+            name: user.displayName || formData.email.split('@')[0],
             email: formData.email,
-            uid: auth.currentUser?.uid,
-            createdAt: new Date().toISOString()
+            uid: user.uid,
+            photoURL: user.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'
           }
           localStorage.setItem('kicksUser', JSON.stringify(userData))
         }
@@ -80,7 +82,7 @@ const Login = () => {
         alert('Login successful!')
       }
       
-      // Clear form after successful registration/signin
+      // Clear form
       setFormData({
         name: '',
         email: '',
@@ -90,7 +92,12 @@ const Login = () => {
         confirmPassword: ''
       })
       
-      navigate('/')
+      // Redirect to intended page or home
+      if (redirect) {
+        navigate(`/${redirect}`)
+      } else {
+        navigate('/')
+      }
     } catch (error) {
       console.error('Authentication error:', error)
       let errorMessage = 'Authentication failed. Please try again.'
@@ -113,25 +120,28 @@ const Login = () => {
     }
   }
 
-  // Google Sign In
   const signInWithGoogle = async () => {
     try {
       setLoading(true)
       const result = await signInWithPopup(auth, googleProvider)
       
-      // Save user data
+      // ✅ SIMPLE Google login - use data directly from Google
       const userData = {
         name: result.user.displayName,
         email: result.user.email,
-        photoURL: result.user.photoURL,
-        uid: result.user.uid,
-        provider: 'google',
-        createdAt: new Date().toISOString()
+        photoURL: result.user.photoURL, // This should work directly
+        uid: result.user.uid
       }
       
       localStorage.setItem('kicksUser', JSON.stringify(userData))
       alert('Google sign-in successful!')
-      navigate('/')
+      
+      // Redirect to intended page or home
+      if (redirect) {
+        navigate(`/${redirect}`)
+      } else {
+        navigate('/')
+      }
     } catch (error) {
       console.error('Google sign-in error:', error)
       alert(`Google sign-in error: ${error.message}`)
@@ -152,6 +162,15 @@ const Login = () => {
               <p className="text-gray-600 mt-2">
                 {isLogin ? 'Enter your details to access your account' : 'Join KICKS for the best footwear experience'}
               </p>
+              
+              {/* Show redirect message if applicable */}
+              {redirect && (
+                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded">
+                  <p className="text-sm text-blue-700">
+                    Please login to continue to {redirect}
+                  </p>
+                </div>
+              )}
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">

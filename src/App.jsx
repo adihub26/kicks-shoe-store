@@ -7,31 +7,53 @@ import AllComet from './Pages/CometCategory/AllComet'
 import AllHighDunks from './Pages/StyleCategory/AllHighDunks'
 import AllSneakers from './Pages/StyleCategory/AllSneakers'
 import ProductDetail from './components/ProductDetail'
-import Cart from './components/Cart'
+import Cart from '/src/components/Cart'
 import Wishlist from './components/Wishlist'
 import Login from './components/Login'
+import Profile from './Pages/Profile'
+import Orders from './Pages/Orders' // ✅ Add this import
+import Checkout from './Pages/Checkout'
+import ProtectedRoute from './components/ProtectedRoute'
 import { CartProvider } from './context/CartContext'
 import { WishlistProvider } from './context/WishlistContext'
+import { OrderProvider } from './context/OrderContext'
 
 function App() {
   return (
     <CartProvider>
       <WishlistProvider>
-        <Router>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/sports" element={<AllSports />} />
-              <Route path="/comet" element={<AllComet />} />
-              <Route path="/style/high-dunks" element={<AllHighDunks />} />
-              <Route path="/style/sneakers" element={<AllSneakers />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/login" element={<Login />} />
-            </Routes>
-          </Layout>
-        </Router>
+        <OrderProvider>
+          <Router>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/sports" element={<AllSports />} />
+                <Route path="/comet" element={<AllComet />} />
+                <Route path="/highdunks" element={<AllHighDunks />} />
+                <Route path="/sneakers" element={<AllSneakers />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/checkout" element={
+                  <ProtectedRoute>
+                    <Checkout />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/orders" element={ // ✅ Add this route
+                  <ProtectedRoute>
+                    <Orders />
+                  </ProtectedRoute>
+                } />
+              </Routes>
+            </Layout>
+          </Router>
+        </OrderProvider>
       </WishlistProvider>
     </CartProvider>
   )

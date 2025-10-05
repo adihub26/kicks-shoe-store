@@ -159,6 +159,7 @@ export const CartProvider = ({ children }) => {
 
   const value = {
     cart,
+    cartItems: cart, // ✅ ADD THIS LINE - provides cartItems as alias for cart
     addToCart,
     removeFromCart,
     updateQuantity,

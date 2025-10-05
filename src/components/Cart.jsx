@@ -1,11 +1,10 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 
 const Cart = () => {
-  const { cart, removeFromCart, updateQuantity, getCartTotal, clearCart, processRazorpayPayment } = useCart()
+  const { cart, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart()
   const navigate = useNavigate()
-  const [paymentLoading, setPaymentLoading] = useState(false)
 
   const handleQuantityChange = (productId, size, newQuantity) => {
     if (newQuantity < 1) return
@@ -19,41 +18,30 @@ const Cart = () => {
     return (subtotal + shipping + tax).toFixed(2)
   }
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
+    // ✅ Login check before checkout
+    const user = JSON.parse(localStorage.getItem('kicksUser') || '{}')
+    
+    if (!user.uid) {
+      alert('Please login to proceed with checkout')
+      navigate('/login?redirect=checkout')
+      return
+    }
+
+    // ✅ Address check before checkout
+    const userAddresses = JSON.parse(localStorage.getItem('kicksUserAddresses') || '[]')
+    if (userAddresses.length === 0) {
+      alert('Please add a shipping address in your profile before checkout')
+      navigate('/profile')
+      return
+    }
+
     if (cart.length === 0) {
       alert('Your cart is empty!')
       return
     }
 
-    setPaymentLoading(true)
-
-    try {
-      await processRazorpayPayment(
-        parseFloat(calculateTotal()),
-        cart,
-        (response) => { // Only one parameter now
-          // Payment success
-          setPaymentLoading(false)
-          console.log('SUCCESS - Payment response:', response);
-          alert('Payment successful! Your order has been placed.')
-          clearCart()
-          // You can navigate to order success page here
-          // navigate('/order-success')
-        },
-        (error) => {
-          // Payment failed
-          setPaymentLoading(false)
-          if (error.message.includes('cancelled')) {
-            alert('Payment was cancelled. Please try again.')
-          } else {
-            alert('Payment failed. Please try again.')
-          }
-        }
-      )
-    } catch (error) {
-      setPaymentLoading(false)
-      alert('Payment processing error. Please try again.')
-    }
+    navigate('/checkout')
   }
 
   if (cart.length === 0) {
@@ -92,12 +80,10 @@ const Cart = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          {/* Cart Items */}
           <div className="divide-y divide-gray-200">
             {cart.map((item) => (
               <div key={`${item.id}-${item.size}`} className="p-6">
                 <div className="flex flex-col sm:flex-row gap-4">
-                  {/* Product Image */}
                   <div className="flex-shrink-0">
                     <img
                       src={item.image}
@@ -106,7 +92,6 @@ const Cart = () => {
                     />
                   </div>
 
-                  {/* Product Details */}
                   <div className="flex-grow">
                     <div className="flex justify-between">
                       <div>
@@ -126,7 +111,6 @@ const Cart = () => {
                       </button>
                     </div>
 
-                    {/* Quantity Controls */}
                     <div className="flex items-center justify-between mt-4">
                       <div className="flex items-center space-x-3">
                         <button
@@ -159,7 +143,6 @@ const Cart = () => {
             ))}
           </div>
 
-          {/* Order Summary */}
           <div className="bg-gray-50 p-6">
             <div className="space-y-4">
               <div className="flex justify-between text-lg">
@@ -184,15 +167,43 @@ const Cart = () => {
               </div>
             </div>
 
-            {/* Checkout Button */}
             <div className="mt-6 space-y-4">
               <button
                 onClick={handleCheckout}
-                disabled={paymentLoading}
-                className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors font-semibold text-lg"
               >
-                {paymentLoading ? 'Processing Payment...' : `Pay ₹${calculateTotal()} with Razorpay`}
+                Proceed to Checkout
               </button>
+              
+              {/* Login & Address reminder */}
+              {(!localStorage.getItem('kicksUser') || JSON.parse(localStorage.getItem('kicksUserAddresses') || '[]').length === 0) && (
+                <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-700">
+                    {!localStorage.getItem('kicksUser') ? (
+                      <>
+                        Need to login?{' '}
+                        <button 
+                          onClick={() => navigate('/login')}
+                          className="text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          Click here to login
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        No shipping address?{' '}
+                        <button 
+                          onClick={() => navigate('/profile')}
+                          className="text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          Add address in profile
+                        </button>
+                      </>
+                    )}
+                  </p>
+                </div>
+              )}
+
               <Link
                 to="/sports"
                 className="block w-full text-center bg-gray-200 text-gray-800 py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
@@ -201,7 +212,6 @@ const Cart = () => {
               </Link>
             </div>
 
-            {/* Razorpay Test Info */}
             <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <h3 className="font-semibold text-yellow-800 mb-2">Test Payment Information</h3>
               <div className="text-sm text-yellow-700 space-y-1">
@@ -212,7 +222,6 @@ const Cart = () => {
               </div>
             </div>
 
-            {/* Security Badges */}
             <div className="mt-6 flex justify-center space-x-6">
               <div className="text-center">
                 <svg className="w-8 h-8 text-green-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

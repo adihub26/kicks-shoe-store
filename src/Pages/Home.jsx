@@ -5,6 +5,7 @@ import { sportsProducts } from '../data/JS SportsProducts'
 import { cometProducts } from '../data/JS CometProducts'
 import { highDunksProducts } from '../data/JS HighDunksProducts'
 import { sneakersProducts } from '../data/JS SneakersProducts'
+import Newsletter from '../components/Newsletter'  // ADD THIS IMPORT
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -170,7 +171,7 @@ const Home = () => {
 
             {/* High Dunks Category */}
             <Link
-              to="/style/high-dunks"
+              to="/highdunks"
               className="group relative h-80 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500"
             >
               <div 
@@ -190,7 +191,7 @@ const Home = () => {
 
             {/* Sneakers Category */}
             <Link
-              to="/style/sneakers"
+              to="/sneakers"
               className="group relative h-80 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500"
             >
               <div 
@@ -265,27 +266,9 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-900 to-purple-900 text-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Stay in the Loop
-          </h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Get exclusive deals, early access to new collections, and style tips from our experts.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-            <input 
-              type="email" 
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-            <button className="bg-red-500 hover:bg-red-600 px-6 py-3 rounded-lg font-semibold transition-colors">
-              Subscribe
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* REPLACE THE EXISTING NEWSLETTER SECTION WITH THIS */}
+      <Newsletter />
+      
     </div>
   )
 }
